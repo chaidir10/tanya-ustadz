@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dashboard Ustadz - Tanya Ustadz (Voice Note)</title>
+<title>Dashboard Ustadz - Tanya Ustadz (Voice Note) dengan Pagination</title>
 
 <!-- Import Poppins font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -66,7 +66,7 @@
   /* Questions container */
   #questions {
     max-width: 720px;
-    margin: 0 auto 3rem auto;
+    margin: 0 auto 1.5rem auto;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -93,6 +93,11 @@
     color: #0a9396;
     font-size: 1.3rem;
     letter-spacing: 0.03em;
+  }
+  .question-meta {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0.3rem 0 0.8rem;
   }
   .question-text {
     font-weight: 600;
@@ -300,6 +305,40 @@
     outline: none;
     box-shadow: 0 3px 12px rgb(0 0 0 / 0.12);
   }
+  /* Pagination */
+  #pagination {
+    max-width: 720px;
+    margin: 0 auto 3rem auto;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    user-select: none;
+  }
+  #pagination button {
+    background: #0a9396;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgb(10 147 150 / 0.5);
+    transition: background-color 0.3s ease;
+  }
+  #pagination button:hover:not(:disabled) {
+    background: #056754;
+  }
+  #pagination button:disabled {
+    background: #7bb3b8;
+    cursor: default;
+    box-shadow: none;
+  }
+  #pagination button.active {
+    background: #056754;
+    box-shadow: 0 6px 18px rgb(5 103 84 / 0.8);
+  }
   /* Responsive */
   @media (max-width: 640px) {
     body {
@@ -359,7 +398,6 @@ textarea {
   font-family: 'Poppins', sans-serif;
   box-sizing: border-box;
 }
-
 </style>
 </head>
 <body>
@@ -378,6 +416,9 @@ textarea {
 
 <div id="questions" aria-live="polite" aria-atomic="true"></div>
 
+<!-- Pagination -->
+<div id="pagination" role="navigation" aria-label="Navigasi halaman pertanyaan"></div>
+
 <!-- Modal Jawab -->
 <div id="modalJawab" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-content" role="document">
@@ -389,7 +430,6 @@ textarea {
   <label for="jawabanInput">Jawaban Teks:</label>
   <textarea id="jawabanInput" placeholder="Tulis jawaban di sini..."></textarea>
 </div>
-
 
     <label>Atau rekam jawaban suara (voice note):</label>
     <div class="voice-controls">
@@ -410,60 +450,74 @@ textarea {
 <script>
   const ustadzLogin = 'Ustadz Muhammad Hafizh';
 
-  const questions = [
-    {
-      tema: 'Fiqih',
-      teks: 'Bolehkah shalat dengan celana pendek?',
-      jawaban: 'Tidak disunnahkan, hendaknya menggunakan pakaian yang menutup aurat.',
-      jawabUstadz: 'Ustadz Yusuf',
-      tambahanJawaban: [
-        { teks: 'Saya tambahkan bahwa memakai pakaian sopan itu wajib.', ustadz: 'Ustadz Abdul' }
-      ],
-      voiceNote: null,
-      waktu: '2025-07-06T07:00:00',
-      kode: '#000001'
-    },
-    {
-      tema: 'Aqidah',
-      teks: 'Apakah Allah berada di atas Arsy?',
-      jawaban: '',
-      jawabUstadz: '',
-      tambahanJawaban: [],
-      voiceNote: null,
-      waktu: '2025-07-06T07:05:00',
-      kode: '#000002'
-    },
-    {
-      tema: 'Tauhid',
-      teks: 'Apa perbedaan syirik besar dan kecil?',
-      jawaban: 'Syirik besar mengeluarkan pelakunya dari Islam, sedangkan syirik kecil tidak.',
-      jawabUstadz: 'Ustadz Muhammad Hafizh',
-      tambahanJawaban: [],
-      voiceNote: null,
-      waktu: '2025-07-06T07:10:00',
-      kode: '#000003'
-    },
-    {
-      tema: 'Hadits',
-      teks: 'Apa hukum hadits dhaif?',
-      jawaban: '',
-      jawabUstadz: '',
-      tambahanJawaban: [],
-      voiceNote: null,
-      waktu: '2025-07-06T07:15:00',
-      kode: '#000004'
-    },
-  ];
+  // Generate dummy data 20 questions
+  const generateDummyQuestions = () => {
+    const temas = ['Fiqih', 'Aqidah', 'Tauhid', 'Hadits', 'Tafsir'];
+    const teksSamples = [
+      'Bolehkah shalat dengan celana pendek?',
+      'Apakah Allah berada di atas Arsy?',
+      'Apa perbedaan syirik besar dan kecil?',
+      'Apa hukum hadits dhaif?',
+      'Bagaimana cara berwudhu yang benar?',
+      'Apa itu takwil dalam tafsir?',
+      'Bagaimana hukum memakan hewan halal?',
+      'Apa syarat sah shalat?',
+      'Bagaimana cara menjaga hati dari riya?',
+      'Apa itu dzikir pagi dan petang?',
+    ];
+    const jawabanSamples = [
+      'Tidak disunnahkan, hendaknya menggunakan pakaian yang menutup aurat.',
+      'Allah berada di atas Arsy sesuai dengan sifat-Nya tanpa menyerupai makhluk.',
+      'Syirik besar mengeluarkan pelakunya dari Islam, sedangkan syirik kecil tidak.',
+      'Hadits dhaif tidak dijadikan hujjah dalam masalah aqidah.',
+      'Berwudhu dimulai dengan niat, membasuh muka, tangan sampai siku, mengusap kepala, dan membasuh kaki.',
+      'Takwil adalah tafsir makna ayat yang tersembunyi berdasarkan ilmu dan dalil yang shahih.',
+      'Hukum memakan hewan halal adalah wajib mengikuti aturan syariat, seperti menyembelih secara benar.',
+      'Syarat sah shalat termasuk suci dari hadas, menutup aurat, dan menghadap kiblat.',
+      'Menjaga hati dari riya dengan ikhlas dalam ibadah dan selalu introspeksi niat.',
+      'Dzikir pagi dan petang dianjurkan untuk menguatkan iman dan memohon perlindungan Allah.',
+    ];
+    const questions = [];
+    const now = Date.now();
 
-  const container = document.getElementById('questions');
+    for (let i = 0; i < 20; i++) {
+      const tema = temas[i % temas.length];
+      const teks = teksSamples[i % teksSamples.length];
+      const kode = `Q${(1000 + i).toString().padStart(4,'0')}`;
+      const tanggal = new Date(now - i * 3600 * 1000).toISOString(); // per jam mundur
+      const answered = (i % 3 === 0); // tiap 3 pertanyaan ada jawaban
+      const jawaban = answered ? jawabanSamples[i % jawabanSamples.length] : '';
+      const jawabUstadz = answered ? ustadzLogin : '';
+      const voiceNote = answered && i % 6 === 0 ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' : ''; // dummy audio url for beberapa jawaban
+
+      const tambahanJawaban = answered && i % 5 === 0 ? [
+        { ustadz: 'Ustadz Ahmad', teks: 'Tambahan penjelasan tentang topik.' },
+        { ustadz: 'Ustadz Ali', teks: 'Perlu diperhatikan juga bahwa...' }
+      ] : [];
+
+      questions.push({
+        tema, teks, kode, tanggal,
+        jawaban, jawabUstadz, voiceNote,
+        tambahanJawaban,
+      });
+    }
+    return questions;
+  };
+
+  let questions = generateDummyQuestions();
+
+  // Pagination vars
+  const questionsPerPage = 5;
+  let currentPage = 1;
+  let currentFilter = 'all';
+
+  // Modal elements
   const modal = document.getElementById('modalJawab');
   const modalTema = document.getElementById('modalTema');
   const modalPertanyaan = document.getElementById('modalPertanyaan');
   const jawabanInput = document.getElementById('jawabanInput');
   const btnCancel = document.getElementById('btnCancel');
   const btnSubmit = document.getElementById('btnSubmit');
-
-  // Voice elements
   const btnRecord = document.getElementById('btnRecord');
   const btnStop = document.getElementById('btnStop');
   const btnPlay = document.getElementById('btnPlay');
@@ -474,29 +528,61 @@ textarea {
   let mediaRecorder = null;
   let audioChunks = [];
   let audioBlobUrl = null;
-  let currentFilter = 'all';
 
+  // Format date to Indonesian with WIB timezone (UTC+7)
+  function formatWaktu(tanggalISO) {
+    const options = {
+      year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Jakarta',
+    };
+    const dt = new Date(tanggalISO);
+    return dt.toLocaleString('id-ID', options) + ' WIB';
+  }
+
+  // Filter questions by currentFilter
+  function getFilteredQuestions() {
+    if (currentFilter === 'all') return questions;
+    if (currentFilter === 'answered') return questions.filter(q => q.jawaban && q.jawaban.trim() !== '');
+    if (currentFilter === 'unanswered') return questions.filter(q => !q.jawaban || q.jawaban.trim() === '');
+    return questions;
+  }
+
+  // Render questions on current page & filter
   function renderQuestions() {
+    const container = document.getElementById('questions');
     container.innerHTML = '';
-    questions.forEach((q, i) => {
-      if (currentFilter === 'answered' && !q.jawaban) return;
-      if (currentFilter === 'unanswered' && q.jawaban) return;
 
+    const filtered = getFilteredQuestions();
+
+    // Pagination calculation
+    const totalPages = Math.ceil(filtered.length / questionsPerPage);
+    if (currentPage > totalPages) currentPage = totalPages || 1;
+
+    const startIdx = (currentPage - 1) * questionsPerPage;
+    const pageItems = filtered.slice(startIdx, startIdx + questionsPerPage);
+
+    pageItems.forEach((q, i) => {
+      const waktuFormat = formatWaktu(q.tanggal);
       const card = document.createElement('div');
       card.className = 'card';
-      if (q.jawaban) card.classList.add('answered');
-      card.dataset.index = i;
+      if (q.jawaban && q.jawaban.trim() !== '') card.classList.add('answered');
+      card.dataset.index = questions.indexOf(q);
 
-      const statusClass = q.jawaban ? 'answered' : 'unanswered';
-      const statusText = q.jawaban
+      const statusClass = q.jawaban && q.jawaban.trim() !== '' ? 'answered' : 'unanswered';
+      const statusText = q.jawaban && q.jawaban.trim() !== ''
         ? `Sudah dijawab oleh <strong>${q.jawabUstadz}</strong>`
-        : '<span style="color:#b33;">Belum dijawab</span>';
+        : '<span>Belum dijawab</span>';
 
       card.innerHTML = `
         <h3>${q.tema}</h3>
+        <div class="question-meta">
+          <strong>Kode:</strong> ${q.kode} &nbsp;|&nbsp; <strong>Tanggal & Waktu Tanya:</strong> ${waktuFormat}
+        </div>
         <div class="question-text">${q.teks}</div>
         <div class="status ${statusClass}">${statusText}</div>
-        ${q.jawaban ? `<div class="answer-text">${q.jawaban}</div>` : ''}
+        ${q.jawaban && q.jawaban.trim() !== '' ? `<div class="answer-text">${q.jawaban}</div>` : ''}
         ${q.voiceNote ? `<div class="answer-voice"><audio controls src="${q.voiceNote}"></audio></div>` : ''}
         ${q.tambahanJawaban && q.tambahanJawaban.length > 0 ? q.tambahanJawaban.map(tj => `
           <div class="answer-added">Tambahan dari <strong>${tj.ustadz}</strong>: ${tj.teks}</div>
@@ -508,42 +594,131 @@ textarea {
       container.appendChild(card);
     });
 
-    // Pasang event click pada tombol jawab
+    // Add event listeners for jawab buttons
     container.querySelectorAll('.btn-jawab').forEach(btn => {
       btn.addEventListener('click', openModal);
     });
+
+    renderPagination(totalPages);
   }
 
+  // Render pagination buttons
+  function renderPagination(totalPages) {
+    const pagContainer = document.getElementById('pagination');
+    pagContainer.innerHTML = '';
+
+    if (totalPages <= 1) return; // no pagination if 1 or less
+
+    // Prev button
+    const btnPrev = document.createElement('button');
+    btnPrev.textContent = 'Prev';
+    btnPrev.disabled = currentPage === 1;
+    btnPrev.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderQuestions();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+    pagContainer.appendChild(btnPrev);
+
+    // Page numbers (limit display to max 7 pages, with ellipsis)
+    let startPage = Math.max(1, currentPage - 3);
+    let endPage = Math.min(totalPages, currentPage + 3);
+
+    if (currentPage <= 4) {
+      endPage = Math.min(7, totalPages);
+    }
+    if (currentPage > totalPages - 4) {
+      startPage = Math.max(totalPages - 6, 1);
+    }
+
+    if (startPage > 1) {
+      const btnFirst = document.createElement('button');
+      btnFirst.textContent = '1';
+      btnFirst.addEventListener('click', () => {
+        currentPage = 1;
+        renderQuestions();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      pagContainer.appendChild(btnFirst);
+
+      if (startPage > 2) {
+        const ellipsis1 = document.createElement('span');
+        ellipsis1.textContent = '...';
+        ellipsis1.style.padding = '0 6px';
+        ellipsis1.style.userSelect = 'none';
+        pagContainer.appendChild(ellipsis1);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      const btnPage = document.createElement('button');
+      btnPage.textContent = i;
+      if (i === currentPage) btnPage.classList.add('active');
+      btnPage.addEventListener('click', () => {
+        currentPage = i;
+        renderQuestions();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      pagContainer.appendChild(btnPage);
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        const ellipsis2 = document.createElement('span');
+        ellipsis2.textContent = '...';
+        ellipsis2.style.padding = '0 6px';
+        ellipsis2.style.userSelect = 'none';
+        pagContainer.appendChild(ellipsis2);
+      }
+      const btnLast = document.createElement('button');
+      btnLast.textContent = totalPages;
+      btnLast.addEventListener('click', () => {
+        currentPage = totalPages;
+        renderQuestions();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      pagContainer.appendChild(btnLast);
+    }
+
+    // Next button
+    const btnNext = document.createElement('button');
+    btnNext.textContent = 'Next';
+    btnNext.disabled = currentPage === totalPages;
+    btnNext.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderQuestions();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+    pagContainer.appendChild(btnNext);
+  }
+
+  // Open modal function
   function openModal(e) {
-    const card = e.target.closest('.card');
-    currentIndex = Number(card.dataset.index);
+    const btn = e.currentTarget;
+    const card = btn.closest('.card');
+    currentIndex = parseInt(card.dataset.index);
+
     const q = questions[currentIndex];
 
     modalTema.textContent = q.tema;
     modalPertanyaan.textContent = q.teks;
+    jawabanInput.value = q.jawaban || '';
 
-    // Reset voice recorder & input
-    resetVoiceRecorder();
+    // Reset voice note UI
+    stopRecording();
+    resetAudio();
 
-    // Jika ini untuk menambah jawaban baru (saat sudah ada jawaban utama)
-    // Jangan tampilkan jawaban utama di textarea karena tambahan jawaban
-    // Jadi textarea kosong, kecuali jawaban utama milik ustadz login dan belum ada tambahan
-    if (!q.jawaban) {
-      jawabanInput.value = '';
-    } else if (q.jawabUstadz === ustadzLogin && (!q.tambahanJawaban || q.tambahanJawaban.length === 0)) {
-      jawabanInput.value = q.jawaban;
-    } else {
-      jawabanInput.value = '';
-    }
-
-    // Jika ada voiceNote dari jawaban utama dan ustadz login, tampilkan
-    if (q.voiceNote && q.jawabUstadz === ustadzLogin && !q.tambahanJawaban) {
+    // If voiceNote exists, load it
+    if(q.voiceNote) {
       audioPlayback.src = q.voiceNote;
       audioPlayback.style.display = 'block';
       btnPlay.disabled = false;
       btnDelete.disabled = false;
     } else {
-      audioPlayback.src = '';
       audioPlayback.style.display = 'none';
       btnPlay.disabled = true;
       btnDelete.disabled = true;
@@ -553,49 +728,41 @@ textarea {
     jawabanInput.focus();
   }
 
+  // Close modal
   function closeModal() {
     modal.classList.remove('active');
     currentIndex = null;
     jawabanInput.value = '';
-    resetVoiceRecorder();
+    stopRecording();
+    resetAudio();
   }
 
   btnCancel.addEventListener('click', closeModal);
 
   btnSubmit.addEventListener('click', () => {
-    const jawabanTeks = jawabanInput.value.trim();
+    if (currentIndex === null) return;
 
-    if (!jawabanTeks && !audioBlobUrl) {
-      alert('Jawaban teks atau voice note harus diisi!');
+    const jawabanText = jawabanInput.value.trim();
+    if (!jawabanText && !audioBlobUrl) {
+      alert('Silakan isi jawaban teks atau rekam voice note terlebih dahulu.');
       return;
     }
 
     const q = questions[currentIndex];
-
-    if (!q.jawaban) {
-      // Belum ada jawaban utama, simpan sebagai jawaban utama
-      q.jawaban = jawabanTeks || '';
-      q.jawabUstadz = ustadzLogin;
-      q.voiceNote = audioBlobUrl || null;
-    } else {
-      // Sudah ada jawaban utama, simpan sebagai tambahan jawaban
-      if (!q.tambahanJawaban) q.tambahanJawaban = [];
-      q.tambahanJawaban.push({
-        teks: jawabanTeks || '(Voice note saja)',
-        ustadz: ustadzLogin,
-        voiceNote: audioBlobUrl || null
-      });
+    q.jawaban = jawabanText;
+    q.jawabUstadz = ustadzLogin;
+    if (audioBlobUrl) {
+      q.voiceNote = audioBlobUrl;
     }
 
-    alert('Jawaban berhasil disimpan sebagai ' + ustadzLogin);
     closeModal();
     renderQuestions();
   });
 
-  // Voice recorder logic (sama seperti sebelumnya)
-  btnRecord.addEventListener('click', async () => {
+  // Voice recording setup
+  async function startRecording() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Browser Anda tidak mendukung perekaman audio.');
+      alert('Browser Anda tidak mendukung perekaman suara.');
       return;
     }
     try {
@@ -604,68 +771,64 @@ textarea {
       audioChunks = [];
       mediaRecorder.start();
 
+      mediaRecorder.addEventListener('dataavailable', event => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.addEventListener('stop', () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        if (audioBlobUrl) {
+          URL.revokeObjectURL(audioBlobUrl);
+        }
+        audioBlobUrl = URL.createObjectURL(audioBlob);
+        audioPlayback.src = audioBlobUrl;
+        audioPlayback.style.display = 'block';
+        btnPlay.disabled = false;
+        btnDelete.disabled = false;
+      });
+
       btnRecord.disabled = true;
       btnStop.disabled = false;
       btnPlay.disabled = true;
       btnDelete.disabled = true;
-      audioPlayback.style.display = 'none';
-      audioPlayback.src = '';
+      jawabanInput.disabled = true;
 
-      mediaRecorder.ondataavailable = e => {
-        audioChunks.push(e.data);
-      };
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        if (audioBlobUrl) URL.revokeObjectURL(audioBlobUrl);
-        audioBlobUrl = URL.createObjectURL(audioBlob);
-        audioPlayback.src = audioBlobUrl;
-        audioPlayback.style.display = 'block';
-
-        btnPlay.disabled = false;
-        btnDelete.disabled = false;
-        btnRecord.disabled = false;
-        btnStop.disabled = true;
-      };
     } catch (err) {
       alert('Gagal mengakses mikrofon: ' + err.message);
     }
-  });
-  btnStop.addEventListener('click', () => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-    }
-  });
-  btnPlay.addEventListener('click', () => {
-    audioPlayback.play();
-  });
-  btnDelete.addEventListener('click', () => {
-    if (audioBlobUrl) {
-      URL.revokeObjectURL(audioBlobUrl);
-      audioBlobUrl = null;
-    }
-    audioPlayback.src = '';
-    audioPlayback.style.display = 'none';
-    btnPlay.disabled = true;
-    btnDelete.disabled = true;
-  });
-  function resetVoiceRecorder() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-    }
-    if (audioBlobUrl) {
-      URL.revokeObjectURL(audioBlobUrl);
-      audioBlobUrl = null;
-    }
-    audioChunks = [];
-    mediaRecorder = null;
+  }
 
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    }
     btnRecord.disabled = false;
     btnStop.disabled = true;
-    btnPlay.disabled = true;
-    btnDelete.disabled = true;
+    jawabanInput.disabled = false;
+  }
+
+  function resetAudio() {
+    if (audioBlobUrl) {
+      URL.revokeObjectURL(audioBlobUrl);
+      audioBlobUrl = null;
+    }
     audioPlayback.src = '';
     audioPlayback.style.display = 'none';
+    btnPlay.disabled = true;
+    btnDelete.disabled = true;
   }
+
+  btnRecord.addEventListener('click', startRecording);
+  btnStop.addEventListener('click', stopRecording);
+  btnPlay.addEventListener('click', () => {
+    if (audioPlayback.src) {
+      audioPlayback.play();
+    }
+  });
+  btnDelete.addEventListener('click', () => {
+    resetAudio();
+  });
 
   // Filter buttons logic
   const filterButtons = document.querySelectorAll('#filterBar button');
@@ -677,12 +840,16 @@ textarea {
       });
       btn.classList.add('active');
       btn.setAttribute('aria-pressed', 'true');
+
       currentFilter = btn.dataset.filter;
+      currentPage = 1;
       renderQuestions();
     });
   });
 
+  // Initial render
   renderQuestions();
+
 </script>
 
 </body>
