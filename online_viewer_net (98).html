@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanya Ustadz - Solusi Islami</title>
+    <meta name="theme-color" content="#1E40AF">
+    <meta name="description" content="Aplikasi tanya jawab dengan ustadz secara online">
+    <link rel="manifest" href="manifest.json">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- ... meta lainnya ... -->
+    <meta property="og:image" content="https://source.unsplash.com/random/600x400/?islamic">
+    <meta name="twitter:image" content="https://source.unsplash.com/random/600x400/?islamic">
+    
+    <!-- Pastikan cache tidak menghalangi -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00A8E8',
+                        primaryDark: '#0582CA',
+                        primaryLight: '#0064ff',
+                        secondary: '#60A5FA',
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border-width: 0;
+            }
+            .dyslexia-mode {
+                font-family: 'Comic Sans MS', sans-serif;
+                letter-spacing: 0.1em;
+                line-height: 1.8;
+            }
+            .animate-fadeIn {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans max-w-md mx-auto relative min-h-screen">
+    <!-- Skip Link untuk Aksesibilitas -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-0 focus:left-0 focus:bg-primaryDark focus:text-white focus:p-2 focus:z-50">
+        Skip to main content
+    </a>
+
+    <!-- Kontrol Aksesibilitas -->
+    <div class="fixed bottom-24 right-3 z-40 flex flex-col gap-2">
+        <button onclick="resizeText(1)" aria-label="Perbesar teks" class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-primaryDark transition-colors">
+            A+
+        </button>
+        <button onclick="resizeText(-1)" aria-label="Perkecil teks" class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-primaryDark transition-colors">
+            A-
+        </button>
+        <button onclick="toggleDyslexiaMode()" aria-label="Mode disleksia" class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-primaryDark transition-colors">
+            🧠
+        </button>
+    </div>
+
+    <!-- Header Aplikasi -->
+    <header class="bg-primary text-white p-4 flex justify-between items-center sticky top-0 z-30 shadow-md">
+        <h1 id="header-title" class="text-xl font-medium">Beranda</h1>
+        <div class="flex gap-4">
+            <button id="search-btn" aria-label="Search" class="text-white text-xl hover:text-secondary transition-colors">
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="notif-btn" aria-label="Notifications" class="text-white text-xl relative hover:text-secondary transition-colors">
+                <i class="fas fa-bell"></i>
+                <span class="sr-only">Notifikasi</span>
+                <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Pencarian -->
+    <div id="search-container" class="hidden bg-white p-4 shadow-md">
+        <div class="relative">
+            <input type="text" id="search-input" placeholder="Cari pertanyaan atau artikel..." 
+                   class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+        </div>
+        <div id="search-results" class="mt-3 max-h-60 overflow-y-auto hidden">
+            <!-- Hasil pencarian akan muncul di sini -->
+        </div>
+    </div>
+
+    <!-- Konten Utama -->
+    <main id="main-content" class="pb-24 pt-2 px-4">
+        <!-- Bagian Beranda -->
+        <section id="home-section">
+            <!-- Banner Selamat Datang -->
+            <div class="bg-gradient-to-br from-primary to-primaryDark text-white rounded-xl p-5 mb-5 shadow-lg">
+                <h2 class="text-lg font-medium mb-2">Assalamu'alaikum</h2>
+                <p class="opacity-90 text-sm">Konsultasi masalah agama dengan ustadz kompeten</p>
+            </div>
+
+            <!-- Tombol Cepat -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="showSection('ask-section')" class="bg-white rounded-xl p-4 flex flex-col items-center shadow-sm hover:shadow-md transition-all hover:bg-gray-50">
+                    <div class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center mb-2 hover:bg-primaryDark transition-colors">
+                        <i class="fas fa-question text-lg"></i>
+                    </div>
+                    <span class="text-sm font-medium">Tanya Ustadz</span>
+                </button>
+                
+                <button onclick="showModal('fiqh-modal')" class="bg-white rounded-xl p-4 flex flex-col items-center shadow-sm hover:shadow-md transition-all hover:bg-gray-50">
+                    <div class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center mb-2 hover:bg-primaryDark transition-colors">
+                        <i class="fas fa-book-quran text-lg"></i>
+                    </div>
+                    <span class="text-sm font-medium">Fiqh</span>
+                </button>
+                
+                <button onclick="showModal('quran-modal')" class="bg-white rounded-xl p-4 flex flex-col items-center shadow-sm hover:shadow-md transition-all hover:bg-gray-50">
+                    <div class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center mb-2 hover:bg-primaryDark transition-colors">
+                        <i class="fas fa-quran text-lg"></i>
+                    </div>
+                    <span class="text-sm font-medium">Al-Qur'an</span>
+                </button>
+                
+                <button onclick="showModal('hadith-modal')" class="bg-white rounded-xl p-4 flex flex-col items-center shadow-sm hover:shadow-md transition-all hover:bg-gray-50">
+                    <div class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center mb-2 hover:bg-primaryDark transition-colors">
+                        <i class="fas fa-book text-lg"></i>
+                    </div>
+                    <span class="text-sm font-medium">Hadits</span>
+                </button>
+            </div>
+
+            <!-- Ustadz Terpopuler -->
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-medium flex items-center">
+                    <i class="fas fa-users text-primary mr-2"></i>
+                    Ustadz Terpopuler
+                </h2>
+                <button onclick="showSection('ustadz-section')" class="text-sm text-primary hover:text-primaryDark">Lihat Semua</button>
+            </div>
+            
+            <div class="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+                <!-- Daftar Ustadz -->
+                <div onclick="showUstadzDetail('Ustadz Ahmad', 'Fiqh & Tafsir')" class="bg-white rounded-xl p-3 flex flex-col items-center min-w-[140px] shadow-sm hover:shadow-md transition-all cursor-pointer hover:bg-gray-50">
+                    <div class="w-16 h-16 rounded-full border-2 border-primary flex items-center justify-center text-white font-medium bg-blue-500 text-xl mb-2">
+                        AH
+                    </div>
+                    <h3 class="text-sm font-medium text-center mb-1">Ustadz Ahmad</h3>
+                    <p class="text-xs text-gray-500 text-center">Fiqh & Tafsir</p>
+                    <div class="flex items-center mt-2 text-yellow-400 text-xs">
+                        <i class="fas fa-star"></i>
+                        <span class="ml-1 text-gray-600">4.9</span>
+                    </div>
+                </div>
+                
+                <div onclick="showUstadzDetail('Ustadz Muhammad', 'Hadits & Sirah')" class="bg-white rounded-xl p-3 flex flex-col items-center min-w-[140px] shadow-sm hover:shadow-md transition-all cursor-pointer hover:bg-gray-50">
+                    <div class="w-16 h-16 rounded-full border-2 border-primary flex items-center justify-center text-white font-medium bg-green-500 text-xl mb-2">
+                        MU
+                    </div>
+                    <h3 class="text-sm font-medium text-center mb-1">Ustadz Muhammad</h3>
+                    <p class="text-xs text-gray-500 text-center">Hadits & Sirah</p>
+                    <div class="flex items-center mt-2 text-yellow-400 text-xs">
+                        <i class="fas fa-star"></i>
+                        <span class="ml-1 text-gray-600">4.8</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artikel Terbaru -->
+            <div class="flex justify-between items-center mt-6 mb-3">
+                <h2 class="text-lg font-medium flex items-center">
+                    <i class="fas fa-newspaper text-primary mr-2"></i>
+                    Artikel Terbaru
+                </h2>
+                <button onclick="showSection('articles-section')" class="text-sm text-primary hover:text-primaryDark">Lihat Semua</button>
+            </div>
+            
+            <div class="grid gap-4">
+                <!-- Artikel 1 -->
+                <article onclick="showArticleModal('Hukum Investasi dalam Islam', 'Investasi dalam Islam harus memenuhi prinsip-prinsip syariah. Bagaimana cara memastikan investasi kita halal?', 'https://source.unsplash.com/random/300x200/?islamic,finance', 'Ustadz Ahmad', '2 hari lalu')" class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/random/300x200/?islamic,finance" alt="Investasi Syariah" class="w-full h-40 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                            <h3 class="text-white font-medium line-clamp-1">Hukum Investasi dalam Islam</h3>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-600 mb-3 line-clamp-2">Investasi dalam Islam harus memenuhi prinsip-prinsip syariah. Bagaimana cara memastikan investasi kita halal?</p>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <div class="flex items-center">
+                                <div class="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium text-xs mr-2">
+                                    AH
+                                </div>
+                                <span>Ustadz Ahmad</span>
+                            </div>
+                            <span><i class="far fa-clock mr-1"></i> 2 hari lalu</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Bagian Tanya Ustadz -->
+        <section id="ask-section" class="hidden">
+            <!-- Form Pertanyaan -->
+            <div class="bg-white rounded-xl p-5 mb-5 shadow-sm">
+                <h2 class="text-lg font-medium mb-4 flex items-center">
+                    <i class="fas fa-question-circle text-primary mr-2"></i>
+                    Ajukan Pertanyaan
+                </h2>
+                
+                <div class="mb-4">
+                    <label for="question-category" class="block text-sm font-medium mb-2 text-gray-700">Kategori Pertanyaan</label>
+                    <select id="question-category" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                        <option value="">Pilih kategori</option>
+                        <option value="fiqh">Fiqh & Ibadah</option>
+                        <option value="aqidah">Aqidah & Tauhid</option>
+                        <option value="muamalah">Muamalah & Ekonomi</option>
+                        <option value="family">Keluarga & Pernikahan</option>
+                        <option value="other">Lainnya</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="question-text" class="block text-sm font-medium mb-2 text-gray-700">Pertanyaan Anda</label>
+                    <textarea id="question-text" placeholder="Tulis pertanyaan Anda secara detail..." class="w-full p-3 border border-gray-300 rounded-lg text-sm min-h-[150px] focus:ring-2 focus:ring-primary focus:border-transparent transition-all"></textarea>
+                </div>
+                
+                <div class="flex items-center mb-4">
+                    <input type="checkbox" id="anonymous" class="rounded text-primary focus:ring-primary">
+                    <label for="anonymous" class="ml-2 text-sm text-gray-700">Kirim sebagai anonim</label>
+                </div>
+                
+                <button onclick="submitQuestion()" class="w-full bg-primary hover:bg-primaryDark text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <i class="fas fa-paper-plane mr-2"></i> Kirim Pertanyaan
+                </button>
+                
+                <p class="text-xs text-gray-500 mt-3 text-center">
+                    <i class="fas fa-info-circle mr-1"></i> Pertanyaan akan diverifikasi terlebih dahulu
+                </p>
+            </div>
+
+            <!-- Tab Pertanyaan -->
+            <div class="flex border-b border-gray-200 mb-4 overflow-x-auto">
+                <button onclick="changeQuestionTab('latest')" class="question-tab active px-4 py-2 text-sm font-medium border-b-2 border-primary text-primary whitespace-nowrap">
+                    <i class="far fa-clock mr-1"></i> Terbaru
+                </button>
+                <button onclick="changeQuestionTab('popular')" class="question-tab px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap">
+                    <i class="fas fa-fire mr-1"></i> Populer
+                </button>
+                <button onclick="changeQuestionTab('unanswered')" class="question-tab px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap">
+                    <i class="far fa-question-circle mr-1"></i> Belum Dijawab
+                </button>
+            </div>
+            
+            <!-- Daftar Pertanyaan -->
+            <div id="latest-questions" class="space-y-4">
+                <!-- Pertanyaan 1 -->
+                <div onclick="showQuestionDetail('1')" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                    <div class="flex items-start mb-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium text-sm mr-3 flex-shrink-0">
+                            AN
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-800 group-hover:text-primary transition-colors">
+                                Apakah boleh membayar zakat fitrah dengan uang?
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-1">Anonim • 2 jam lalu</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                        Saya mendengar ada perbedaan pendapat tentang hal ini di kalangan ulama. Mohon penjelasannya.
+                    </p>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Fiqh & Ibadah</span>
+                        <div class="flex items-center text-gray-500">
+                            <i class="far fa-comment mr-1"></i>
+                            <span>5 jawaban</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pertanyaan 2 -->
+                <div onclick="showQuestionDetail('2')" class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                    <div class="flex items-start mb-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-sm mr-3 flex-shrink-0">
+                            AB
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-800 group-hover:text-primary transition-colors">
+                                Bagaimana hukumnya bekerja di perusahaan asuransi konvensional?
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-1">Abdullah • 1 hari lalu</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                        Saya sedang membutuhkan pekerjaan dan ada tawaran dari perusahaan asuransi konvensional.
+                    </p>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Muamalah & Ekonomi</span>
+                        <div class="flex items-center text-gray-500">
+                            <i class="far fa-comment mr-1"></i>
+                            <span>1 jawaban</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+            <!-- Bagian Profil -->
+    <section id="profile-section" class="hidden">
+        <!-- Header Profil -->
+        <div class="bg-gradient-to-br from-primary to-primaryDark text-white pt-6 pb-5 px-5 rounded-b-xl mb-5 text-center relative">
+            <button onclick="showSection('home-section')" class="absolute left-4 top-6 text-white text-xl hover:text-secondary transition-colors">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="relative mx-auto w-24 h-24 mb-3">
+                <div class="w-full h-full rounded-full border-4 border-white flex items-center justify-center text-white font-bold bg-purple-500 text-2xl">
+                    AR
+                </div>
+                <button onclick="showModal('edit-avatar-modal')" class="absolute bottom-0 right-0 bg-white text-primary w-8 h-8 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-pencil-alt text-xs"></i>
+                </button>
+            </div>
+            <h2 class="text-xl font-medium mb-1">Abdullah Rahman</h2>
+            <p class="text-sm opacity-90 mb-4">Pengguna aktif sejak Mei 2023</p>
+            
+            <div class="flex justify-center gap-6">
+                <div class="text-center">
+                    <p class="text-lg font-medium">24</p>
+                    <p class="text-xs opacity-80">Pertanyaan</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-lg font-medium">37</p>
+                    <p class="text-xs opacity-80">Jawaban</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-lg font-medium">128</p>
+                    <p class="text-xs opacity-80">Disukai</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu Profil -->
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm mb-5">
+            <button onclick="showModal('edit-profile-modal')" class="w-full flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <span class="flex-1 font-medium">Edit Profil</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+            
+            <button onclick="showModal('my-questions-modal')" class="w-full flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <span class="flex-1 font-medium">Pertanyaan Saya</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+            
+            <button onclick="showModal('saved-content-modal')" class="w-full flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                    <i class="fas fa-bookmark"></i>
+                </div>
+                <span class="flex-1 font-medium">Tersimpan</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+            
+            <button onclick="showModal('notifications-modal')" class="w-full flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <span class="flex-1 font-medium">Notifikasi</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+            
+            <button onclick="logout()" class="w-full flex items-center p-4 hover:bg-gray-50 transition-colors text-left">
+                <div class="w-8 h-8 rounded-full bg-red-100 text-red-500 flex items-center justify-center mr-4">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <span class="flex-1 font-medium">Keluar</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+        </div>
+        
+        <!-- Pengaturan Aplikasi -->
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+            <h3 class="p-4 font-medium border-b border-gray-100">Pengaturan Aplikasi</h3>
+            
+            <div class="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <span>Mode Gelap</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                        <i class="fas fa-bell-slash"></i>
+                    </div>
+                    <span>Notifikasi</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="notif-toggle" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+            </div>
+            
+            <button onclick="showModal('about-modal')" class="w-full flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <span class="flex-1">Tentang Aplikasi</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+            
+            <button onclick="showModal('help-modal')" class="w-full flex items-center p-4 hover:bg-gray-50 transition-colors text-left">
+                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <span class="flex-1">Bantuan & Panduan</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </button>
+        </div>
+    </section>
+</main>
+    <!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg flex justify-around max-w-md mx-auto z-20 border-t border-gray-100">
+    <button onclick="showSection('home-section')" class="nav-item active flex flex-col items-center p-3 text-primary hover:text-primaryDark transition-colors">
+        <i class="fas fa-home text-xl mb-1"></i>
+        <span class="text-xs">Beranda</span>
+    </button>
+    <button onclick="showSection('ask-section')" class="nav-item flex flex-col items-center p-3 text-gray-500 hover:text-primary transition-colors">
+        <i class="fas fa-question-circle text-xl mb-1"></i>
+        <span class="text-xs">Tanya</span>
+    </button>
+    <button onclick="showSection('questions-section')" class="nav-item flex flex-col items-center p-3 text-gray-500 hover:text-primary transition-colors">
+        <i class="fas fa-comments text-xl mb-1"></i>
+        <span class="text-xs">Forum</span>
+    </button>
+    <button onclick="showSection('profile-section')" class="nav-item flex flex-col items-center p-3 text-gray-500 hover:text-primary transition-colors">
+        <i class="fas fa-user text-xl mb-1"></i>
+        <span class="text-xs">Profil</span>
+    </button>
+</nav>
+
+<!-- Modal Ustadz -->
+<div id="ustadz-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-fadeIn">
+        <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+            <h3 id="ustadz-modal-title" class="text-lg font-medium">Detail Ustadz</h3>
+            <button onclick="closeModal('ustadz-modal')" class="text-gray-500 text-2xl hover:text-gray-700">&times;</button>
+        </div>
+        <div class="p-4">
+            <div class="text-center">
+                <div id="modal-ustadz-avatar" class="w-24 h-24 rounded-full border-2 border-primary mx-auto mb-3 flex items-center justify-center text-white font-bold bg-blue-500 text-3xl">
+                    UA
+                </div>
+                <h3 id="modal-ustadz-name" class="text-lg font-medium mb-1">Ustadz Ahmad</h3>
+                <p id="modal-ustadz-specialty" class="text-sm text-gray-500 mb-4">Fiqh & Tafsir</p>
+                
+                <div class="flex justify-center gap-4 mb-4">
+                    <span class="flex items-center text-yellow-400 text-sm">
+                        <i class="fas fa-star"></i>
+                        <span class="ml-1 text-gray-600">4.9 (128 review)</span>
+                    </span>
+                    <span class="flex items-center text-primary text-sm">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span class="ml-1 text-gray-600">15 tahun pengalaman</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium mb-2 text-gray-700">Biografi</h4>
+                <p id="modal-ustadz-bio" class="text-sm text-gray-600">
+                    Lulusan Universitas Islam Madinah, spesialis dalam bidang Fiqh Kontemporer dan Tafsir Al-Qur'an. 
+                    Aktif sebagai pengajar di berbagai majelis taklim dan penulis beberapa buku Islami. 
+                    Memiliki pengalaman 15 tahun dalam memberikan fatwa dan bimbingan agama.
+                </p>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium mb-2 text-gray-700">Keahlian</h4>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Fiqh Ibadah</span>
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Tafsir Al-Qur'an</span>
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Fatwa Kontemporer</span>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium mb-2 text-gray-700">Jadwal Konsultasi</h4>
+                <div class="space-y-2">
+                    <div class="flex items-center text-sm">
+                        <i class="far fa-clock text-primary mr-2"></i>
+                        <span>Senin - Jumat: 09.00 - 15.00 WIB</span>
+                    </div>
+                    <div class="flex items-center text-sm">
+                        <i class="far fa-clock text-primary mr-2"></i>
+                        <span>Sabtu: 09.00 - 12.00 WIB</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="askToUstadz()" class="flex-1 bg-primary hover:bg-primaryDark text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    <i class="fas fa-question mr-2"></i> Tanya Ustadz
+                </button>
+                <button onclick="showModal('schedule-modal')" class="flex-1 border border-primary text-primary font-medium py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">
+                    <i class="far fa-calendar-alt mr-2"></i> Jadwalkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pertanyaan -->
+<div id="question-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-fadeIn">
+        <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+            <h3 class="text-lg font-medium">Detail Pertanyaan</h3>
+            <button onclick="closeModal('question-modal')" class="text-gray-500 text-2xl hover:text-gray-700">&times;</button>
+        </div>
+        <div class="p-4">
+            <div class="flex items-start mb-4">
+                <div id="modal-question-avatar" class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium mr-3">
+                    AN
+                </div>
+                <div>
+                    <h3 id="modal-question-name" class="text-sm font-medium">Anonim</h3>
+                    <p id="modal-question-date" class="text-xs text-gray-500">2 jam lalu</p>
+                </div>
+            </div>
+            
+            <span id="modal-question-category" class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-3">Fiqh & Ibadah</span>
+            
+            <p id="modal-question-content" class="text-sm mb-6">
+                Apakah boleh membayar zakat fitrah dengan uang? Saya mendengar ada perbedaan pendapat tentang hal ini di kalangan ulama. 
+                Mohon penjelasan tentang dalil-dalil yang digunakan oleh masing-masing pendapat.
+            </p>
+            
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleLikeQuestion()" class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                        <i id="like-icon" class="far fa-thumbs-up"></i>
+                        <span id="like-count" class="ml-1 text-sm">24</span>
+                    </button>
+                    <button onclick="showShareDialog()" class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                        <i class="fas fa-share"></i>
+                        <span class="ml-1 text-sm">Bagikan</span>
+                    </button>
+                </div>
+                <button onclick="showModal('report-modal')" class="text-xs text-gray-500 hover:text-red-500 transition-colors">
+                    <i class="fas fa-flag mr-1"></i> Laporkan
+                </button>
+            </div>
+            
+            <h4 class="text-base font-medium mb-3 flex items-center border-b pb-2">
+                <i class="fas fa-comments text-primary mr-2"></i>
+                Jawaban (5)
+            </h4>
+                            <div id="answer-list" class="space-y-4 mb-4">
+                    <!-- Jawaban 1 -->
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex items-start mb-2">
+                            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-sm mr-2">
+                                AH
+                            </div>
+                            <div>
+                                <h5 class="text-sm font-medium">Ustadz Ahmad</h5>
+                                <p class="text-xs text-gray-500">1 jam lalu</p>
+                            </div>
+                            <span class="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Ustadz</span>
+                        </div>
+                        <p class="text-sm mb-3">
+                            Wa'alaikumussalam warahmatullahi wabarakatuh. Mengenai zakat fitrah dengan uang, memang ada perbedaan pendapat di kalangan ulama. 
+                            Mayoritas ulama berpendapat bahwa zakat fitrah harus dikeluarkan dalam bentuk makanan pokok seperti beras, gandum atau kurma. 
+                            Namun sebagian ulama kontemporer membolehkan dengan uang jika lebih bermanfaat bagi mustahik.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <button onclick="toggleLikeAnswer('1')" class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                <i id="like-answer-1" class="far fa-thumbs-up"></i>
+                                <span id="like-count-1" class="ml-1 text-xs">12</span>
+                            </button>
+                            <button onclick="showReplyForm('1')" class="text-xs text-gray-500 hover:text-primary transition-colors">
+                                <i class="far fa-comment-dots mr-1"></i> Tanggapi
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Jawaban 2 -->
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex items-start mb-2">
+                            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-medium text-sm mr-2">
+                                MU
+                            </div>
+                            <div>
+                                <h5 class="text-sm font-medium">Ustadz Muhammad</h5>
+                                <p class="text-xs text-gray-500">30 menit lalu</p>
+                            </div>
+                            <span class="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Ustadz</span>
+                        </div>
+                        <p class="text-sm mb-3">
+                            Dalam madzhab Syafi'i yang dianut mayoritas muslim Indonesia, zakat fitrah harus dikeluarkan dalam bentuk makanan pokok. 
+                            Ini berdasarkan hadits-hadits yang menyebutkan Nabi SAW memerintahkan zakat fitrah dengan kurma, gandum, keju atau anggur kering. 
+                            Wallahu a'lam.
+                        </p>
+                        <div class="flex justify-between items-center">
+                            <button onclick="toggleLikeAnswer('2')" class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                <i id="like-answer-2" class="far fa-thumbs-up"></i>
+                                <span id="like-count-2" class="ml-1 text-xs">8</span>
+                            </button>
+                            <button onclick="showReplyForm('2')" class="text-xs text-gray-500 hover:text-primary transition-colors">
+                                <i class="far fa-comment-dots mr-1"></i> Tanggapi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="answer-text" class="block text-sm font-medium mb-2 text-gray-700">Jawaban Anda</label>
+                    <textarea id="answer-text" placeholder="Tulis jawaban Anda secara detail..." 
+                              class="w-full p-3 border border-gray-300 rounded-lg text-sm min-h-[120px] focus:ring-2 focus:ring-primary focus:border-transparent transition-all"></textarea>
+                </div>
+                
+                <div class="flex items-center mb-4">
+                    <input type="checkbox" id="expert-answer" class="rounded text-primary focus:ring-primary">
+                    <label for="expert-answer" class="ml-2 text-sm text-gray-700">Saya seorang ustadz/ahli di bidang ini</label>
+                </div>
+                
+                <button onclick="submitAnswer()" 
+                        class="w-full bg-primary hover:bg-primaryDark text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <i class="fas fa-paper-plane mr-2"></i> Kirim Jawaban
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Artikel -->
+    <div id="article-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-fadeIn">
+            <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+                <h3 id="article-modal-title" class="text-lg font-medium">Artikel</h3>
+                <button onclick="closeModal('article-modal')" class="text-gray-500 text-2xl hover:text-gray-700">&times;</button>
+            </div>
+            <div class="p-4">
+
+    <img src="https://source.unsplash.com/random/600x400/?quran" 
+         alt="Al-Quran" 
+         class="w-full h-48 object-cover rounded-lg mb-4"
+         loading="lazy">  <!-- Optimasi loading -->
+                <h3 id="modal-article-title" class="text-xl font-medium mb-3">Hukum Investasi dalam Islam</h3>
+                <div id="modal-article-meta" class="flex justify-between text-sm text-gray-500 mb-4">
+                    <span><i class="fas fa-user mr-1"></i> Ustadz Ahmad</span>
+                    <span><i class="fas fa-clock mr-1"></i> 2 hari lalu</span>
+                </div>
+                <p id="modal-article-content" class="text-sm text-gray-700 mb-6">
+                    Investasi dalam Islam harus memenuhi prinsip-prinsip syariah. Bagaimana cara memastikan investasi kita halal?
+                </p>
+                <button onclick="shareArticle()" class="w-full bg-primary hover:bg-primaryDark text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                    <i class="fas fa-share mr-2"></i> Bagikan Artikel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Sukses -->
+    <div id="success-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm p-6 text-center animate-fadeIn">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-medium mb-2">Berhasil!</h3>
+            <p id="success-modal-message" class="text-gray-600 mb-4">Aksi berhasil dilakukan</p>
+            <button onclick="closeModal('success-modal')" class="w-full bg-primary hover:bg-primaryDark text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm p-6 animate-fadeIn">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-question text-2xl"></i>
+            </div>
+            <h3 id="confirm-modal-title" class="text-lg font-medium mb-2 text-center">Konfirmasi</h3>
+            <p id="confirm-modal-message" class="text-gray-600 mb-6 text-center">Apakah Anda yakin ingin melakukan aksi ini?</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal('confirm-modal')" class="flex-1 border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                    Batal
+                </button>
+                <button onclick="confirmAction()" class="flex-1 bg-primary hover:bg-primaryDark text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Ya
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    // Variabel global untuk menyimpan data
+let currentQuestionId = null;
+let currentSection = 'home-section';
+let confirmCallback = null;
+
+// Function to generate initials from name
+function getInitials(name) {
+    // Remove titles like "Ustadz" first
+    const cleanName = name.replace(/^Ustadz\s+/i, '');
+    const parts = cleanName.split(' ');
+    let initials = parts[0].charAt(0).toUpperCase();
+    if (parts.length > 1) {
+        initials += parts[parts.length - 1].charAt(0).toUpperCase();
+    }
+    return initials;
+}
+
+const questions = {
+    '1': {
+        title: "Apakah boleh membayar zakat fitrah dengan uang?",
+        author: "Anonim",
+        avatar: "AN",
+        date: "2 jam lalu",
+        category: "Fiqh & Ibadah",
+        content: "Saya mendengar ada perbedaan pendapat tentang hal ini di kalangan ulama. Mohon penjelasannya.",
+        likes: 24,
+        isLiked: false,
+        answers: [
+            {
+                id: 1,
+                author: "Ustadz Ahmad",
+                avatar: "AH",
+                date: "1 jam lalu",
+                content: "Wa'alaikumussalam warahmatullahi wabarakatuh. Mengenai zakat fitrah dengan uang, memang ada perbedaan pendapat di kalangan ulama. Mayoritas ulama berpendapat bahwa zakat fitrah harus dikeluarkan dalam bentuk makanan pokok seperti beras, gandum atau kurma. Namun sebagian ulama kontemporer membolehkan dengan uang jika lebih bermanfaat bagi mustahik.",
+                likes: 12,
+                isLiked: false,
+                isExpert: true
+            },
+            {
+                id: 2,
+                author: "Ustadz Muhammad",
+                avatar: "MU",
+                date: "30 menit lalu",
+                content: "Dalam madzhab Syafi'i yang dianut mayoritas muslim Indonesia, zakat fitrah harus dikeluarkan dalam bentuk makanan pokok. Ini berdasarkan hadits-hadits yang menyebutkan Nabi SAW memerintahkan zakat fitrah dengan kurma, gandum, keju atau anggur kering. Wallahu a'lam.",
+                likes: 8,
+                isLiked: false,
+                isExpert: true
+            }
+        ]
+    },
+    '2': {
+        title: "Bagaimana hukumnya bekerja di perusahaan asuransi konvensional?",
+        author: "Abdullah",
+        avatar: "AB",
+        date: "1 hari lalu",
+        category: "Muamalah & Ekonomi",
+        content: "Saya sedang membutuhkan pekerjaan dan ada tawaran dari perusahaan asuransi konvensional. Bagaimana hukumnya bekerja di perusahaan tersebut?",
+        likes: 15,
+        isLiked: false,
+        answers: [
+            {
+                id: 3,
+                author: "Ustadz Ali",
+                avatar: "AL",
+                date: "5 jam lalu",
+                content: "Bekerja di perusahaan asuransi konvensional yang menggunakan sistem riba hukumnya haram. Namun jika Anda berada di posisi yang tidak berhubungan langsung dengan sistem riba, dan hanya sebagai karyawan administrasi misalnya, maka ada ulama yang membolehkan dengan syarat Anda tidak setuju dengan sistem riba tersebut.",
+                likes: 15,
+                isLiked: false,
+                isExpert: true
+            }
+        ]
+    }
+};
+
+// Fungsi untuk menampilkan/menyembunyikan section
+function showSection(sectionId) {
+    // Sembunyikan section yang aktif
+    document.querySelectorAll('main section').forEach(section => {
+        section.classList.add('hidden');
+    });
+    
+    // Tampilkan section yang dipilih
+    document.getElementById(sectionId).classList.remove('hidden');
+    
+    // Update navigasi bawah
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('text-primary');
+        item.classList.add('text-gray-500');
+    });
+    
+    // Update judul header
+    const headerTitle = document.getElementById('header-title');
+    switch(sectionId) {
+        case 'home-section':
+            headerTitle.textContent = 'Beranda';
+            document.querySelector('.nav-item:nth-child(1)').classList.add('text-primary');
+            document.querySelector('.nav-item:nth-child(1)').classList.remove('text-gray-500');
+            break;
+        case 'ask-section':
+            headerTitle.textContent = 'Tanya Ustadz';
+            document.querySelector('.nav-item:nth-child(2)').classList.add('text-primary');
+            document.querySelector('.nav-item:nth-child(2)').classList.remove('text-gray-500');
+            break;
+        case 'profile-section':
+            headerTitle.textContent = 'Profil';
+            document.querySelector('.nav-item:nth-child(4)').classList.add('text-primary');
+            document.querySelector('.nav-item:nth-child(4)').classList.remove('text-gray-500');
+            break;
+        default:
+            headerTitle.textContent = sectionId.replace('-section', '');
+    }
+    
+    currentSection = sectionId;
+}
+
+// Fungsi untuk menampilkan modal
+function showModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Fungsi untuk menyembunyikan modal
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Fungsi untuk menampilkan detail pertanyaan
+function showQuestionDetail(questionId) {
+    currentQuestionId = questionId;
+    const question = questions[questionId];
+    
+    // Update modal dengan data pertanyaan
+    const questionAvatar = document.getElementById('modal-question-avatar');
+    questionAvatar.innerHTML = '';
+    questionAvatar.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white font-medium mr-3';
+    questionAvatar.classList.add(question.author === 'Anonim' ? 'bg-purple-500' : 'bg-blue-500');
+    questionAvatar.textContent = question.avatar;
+    
+    document.getElementById('modal-question-name').textContent = question.author;
+    document.getElementById('modal-question-date').textContent = question.date;
+    document.getElementById('modal-question-category').textContent = question.category;
+    document.getElementById('modal-question-content').textContent = question.content;
+    document.getElementById('like-count').textContent = question.likes;
+    
+    // Update like icon
+    const likeIcon = document.getElementById('like-icon');
+    likeIcon.className = question.isLiked ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+    likeIcon.style.color = question.isLiked ? '#1E40AF' : '';
+    
+    // Render jawaban
+    const answerList = document.getElementById('answer-list');
+    answerList.innerHTML = '';
+    
+    question.answers.forEach(answer => {
+        const answerElement = document.createElement('div');
+        answerElement.className = 'bg-gray-50 rounded-lg p-3';
+        
+        const colorClass = answer.isExpert ? 'bg-blue-500' : 'bg-green-500';
+        
+        answerElement.innerHTML = `
+            <div class="flex items-start mb-2">
+                <div class="w-8 h-8 rounded-full ${colorClass} flex items-center justify-center text-white font-medium text-sm mr-2">
+                    ${answer.avatar}
+                </div>
+                <div>
+                    <h5 class="text-sm font-medium">${answer.author}</h5>
+                    <p class="text-xs text-gray-500">${answer.date}</p>
+                </div>
+                ${answer.isExpert ? '<span class="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Ustadz</span>' : ''}
+            </div>
+            <p class="text-sm mb-3">${answer.content}</p>
+            <div class="flex justify-between items-center">
+                <button onclick="toggleLikeAnswer(${answer.id})" class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                    <i id="like-answer-${answer.id}" class="${answer.isLiked ? 'fas' : 'far'} fa-thumbs-up"></i>
+                    <span id="like-count-${answer.id}" class="ml-1 text-xs">${answer.likes}</span>
+                </button>
+                <button onclick="showReplyForm(${answer.id})" class="text-xs text-gray-500 hover:text-primary transition-colors">
+                    <i class="far fa-comment-dots mr-1"></i> Tanggapi
+                </button>
+            </div>
+        `;
+        answerList.appendChild(answerElement);
+    });
+    
+    showModal('question-modal');
+}
+
+// Fungsi untuk toggle like pertanyaan
+function toggleLikeQuestion() {
+    const question = questions[currentQuestionId];
+    question.isLiked = !question.isLiked;
+    question.likes += question.isLiked ? 1 : -1;
+    
+    const likeIcon = document.getElementById('like-icon');
+    likeIcon.className = question.isLiked ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+    likeIcon.style.color = question.isLiked ? '#1E40AF' : '';
+    document.getElementById('like-count').textContent = question.likes;
+}
+
+// Fungsi untuk toggle like jawaban
+function toggleLikeAnswer(answerId) {
+    const question = questions[currentQuestionId];
+    const answer = question.answers.find(a => a.id === answerId);
+    
+    if (answer) {
+        answer.isLiked = !answer.isLiked;
+        answer.likes += answer.isLiked ? 1 : -1;
+        
+        const likeIcon = document.getElementById(`like-answer-${answerId}`);
+        likeIcon.className = answer.isLiked ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+        likeIcon.style.color = answer.isLiked ? '#1E40AF' : '';
+        document.getElementById(`like-count-${answerId}`).textContent = answer.likes;
+    }
+}
+
+// Fungsi untuk mengirim jawaban
+function submitAnswer() {
+    const answerText = document.getElementById('answer-text').value;
+    const isExpert = document.getElementById('expert-answer').checked;
+    
+    if (!answerText.trim()) {
+        alert('Silakan tulis jawaban Anda terlebih dahulu');
+        return;
+    }
+    
+    const newAnswer = {
+        id: Date.now(),
+        author: isExpert ? "Ustadz Anda" : "Anonim",
+        avatar: isExpert ? "US" : "AN",
+        date: "Baru saja",
+        content: answerText,
+        likes: 0,
+        isLiked: false,
+        isExpert
+    };
+    
+    questions[currentQuestionId].answers.unshift(newAnswer);
+    document.getElementById('answer-text').value = '';
+    document.getElementById('expert-answer').checked = false;
+    
+    // Update tampilan jawaban
+    showQuestionDetail(currentQuestionId);
+    
+    // Tampilkan notifikasi sukses
+    document.getElementById('success-modal-message').textContent = "Jawaban Anda berhasil dikirim dan akan diverifikasi";
+    showModal('success-modal');
+}
+// Fungsi untuk mengirim pertanyaan
+function submitQuestion() {
+    const questionText = document.getElementById('question-text').value;
+    const category = document.getElementById('question-category').value;
+    
+    if (!category) {
+        alert('Silakan pilih kategori pertanyaan');
+        return;
+    }
+    
+    if (!questionText.trim()) {
+        alert('Silakan tulis pertanyaan Anda');
+        return;
+    }
+    
+    // Simpan pertanyaan (dalam aplikasi nyata ini akan dikirim ke server)
+    const newQuestionId = Date.now().toString();
+    const isAnonymous = document.getElementById('anonymous').checked;
+    const authorName = isAnonymous ? "Anonim" : "Anda";
+    
+    questions[newQuestionId] = {
+        title: questionText.substring(0, 50) + (questionText.length > 50 ? "..." : ""),
+        author: authorName,
+        avatar: isAnonymous ? "AN" : "AN", // You can customize this
+        date: "Baru saja",
+        category: document.querySelector(`#question-category option[value="${category}"]`).text,
+        content: questionText,
+        likes: 0,
+        isLiked: false,
+        answers: []
+    };
+    
+    // Reset form
+    document.getElementById('question-text').value = '';
+    document.getElementById('question-category').value = '';
+    document.getElementById('anonymous').checked = false;
+    
+    // Tampilkan notifikasi sukses
+    document.getElementById('success-modal-message').textContent = "Pertanyaan Anda berhasil dikirim dan akan diverifikasi";
+    showModal('success-modal');
+    
+    // Kembali ke halaman utama setelah 2 detik
+    setTimeout(() => {
+        closeModal('success-modal');
+        showSection('home-section');
+    }, 2000);
+}
+
+// Fungsi untuk menampilkan modal detail ustadz
+function showUstadzDetail(name, specialty) {
+    document.getElementById('ustadz-modal-title').textContent = name;
+    document.getElementById('modal-ustadz-name').textContent = name;
+    document.getElementById('modal-ustadz-specialty').textContent = specialty;
+    
+    const initials = getInitials(name);
+    const avatarElement = document.getElementById('modal-ustadz-avatar');
+    avatarElement.innerHTML = initials;
+    avatarElement.className = 'w-24 h-24 rounded-full border-2 border-primary mx-auto mb-3 flex items-center justify-center text-white font-bold text-3xl';
+    avatarElement.classList.add(name.includes('Ahmad') ? 'bg-blue-500' : 'bg-green-500');
+    
+    document.getElementById('modal-ustadz-bio').textContent = `Lulusan Universitas Islam Madinah, spesialis dalam bidang ${specialty}. Aktif sebagai pengajar di berbagai majelis taklim dan penulis beberapa buku Islami.`;
+    
+    showModal('ustadz-modal');
+}
+
+// Fungsi untuk menampilkan modal artikel
+function showArticleModal(title, content, image, author, date) {
+    document.getElementById('article-modal-title').textContent = title;
+    document.getElementById('modal-article-title').textContent = title;
+    document.getElementById('modal-article-content').textContent = content;
+    document.getElementById('modal-article-image').src = image;
+    document.getElementById('modal-article-meta').innerHTML = `
+        <span><i class="fas fa-user mr-1"></i> ${author}</span>
+        <span><i class="fas fa-clock mr-1"></i> ${date}</span>
+    `;
+    
+    showModal('article-modal');
+}
+
+// Fungsi untuk menampilkan dialog konfirmasi
+function showConfirm(title, message, callback) {
+    document.getElementById('confirm-modal-title').textContent = title;
+    document.getElementById('confirm-modal-message').textContent = message;
+    confirmCallback = callback;
+    showModal('confirm-modal');
+}
+
+// Fungsi untuk konfirmasi aksi
+function confirmAction() {
+    if (confirmCallback) {
+        confirmCallback();
+    }
+    closeModal('confirm-modal');
+}
+
+// Fungsi untuk logout
+function logout() {
+    showConfirm('Konfirmasi Keluar', 'Apakah Anda yakin ingin keluar?', function() {
+        document.getElementById('success-modal-message').textContent = 'Anda telah berhasil keluar';
+        showModal('success-modal');
+        showSection('home-section');
+    });
+}
+
+// Fungsi untuk mengubah ukuran teks
+function resizeText(step) {
+    const html = document.querySelector('html');
+    const currentSize = parseFloat(window.getComputedStyle(html, null).getPropertyValue('font-size'));
+    const newSize = currentSize + (step * 2);
+    if (newSize >= 12 && newSize <= 24) {
+        html.style.fontSize = newSize + 'px';
+    }
+}
+
+// Fungsi untuk toggle mode disleksia
+function toggleDyslexiaMode() {
+    document.body.classList.toggle('dyslexia-mode');
+}
+
+// Fungsi untuk menampilkan form balasan
+function showReplyForm(answerId) {
+    const answerText = document.getElementById('answer-text');
+    answerText.focus();
+    answerText.placeholder = `Menanggapi jawaban #${answerId}...`;
+}
+
+// Fungsi untuk menampilkan dialog share
+function showShareDialog() {
+    alert('Fitur share akan membuka dialog sharing perangkat');
+}
+
+// Fungsi untuk share artikel
+function shareArticle() {
+    alert('Artikel akan dibagikan melalui media sosial');
+}
+
+// Fungsi untuk bertanya ke ustadz
+function askToUstadz() {
+    closeModal('ustadz-modal');
+    showSection('ask-section');
+}
+
+// Inisialisasi aplikasi saat pertama kali dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    showSection('home-section');
+    
+    // Event listener untuk tombol pencarian
+    document.getElementById('search-btn').addEventListener('click', function() {
+        document.getElementById('search-container').classList.toggle('hidden');
+    });
+    
+    // Event listener untuk tab pertanyaan
+    document.querySelectorAll('.question-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.question-tab').forEach(t => {
+                t.classList.remove('active', 'text-primary', 'border-primary');
+                t.classList.add('text-gray-500', 'border-transparent');
+            });
+            this.classList.add('active', 'text-primary', 'border-primary');
+            this.classList.remove('text-gray-500', 'border-transparent');
+        });
+    });
+    
+    // Event listener untuk toggle dark mode
+    document.getElementById('dark-mode-toggle').addEventListener('change', function() {
+        document.body.classList.toggle('bg-gray-900', 'text-white');
+        document.body.classList.toggle('bg-gray-50', 'text-gray-800');
+    });
+});
+</script>
